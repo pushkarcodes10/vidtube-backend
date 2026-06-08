@@ -1,0 +1,31 @@
+{
+  "name": "vidtube",
+  "version": "1.0.0",
+  "description": "A video streaming backend platform inspired from youtube",
+  "keywords": [
+    "nodejs",
+    "mongoose",
+    "express",
+    "backend"
+  ],
+  "license": "ISC",
+  "author": "Pushkar Raj",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "prettier": "^3.8.3"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.3",
+    "morgan": "^1.11.0",
+    "winston": "^3.19.0"
+  }
+}
