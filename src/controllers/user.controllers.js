@@ -3,10 +3,10 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.models.js";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
-import { http } from "winston";
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
 
-const generateAcessandRefreshToken = async(userId) => {
+const generateAccessandRefreshToken = async(userId) => {
   try {
     const user = await User.findById(userId)
   
@@ -122,13 +122,13 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found")
   }
 
-  const isPasswordVaid = await isPasswordCorrect(password)
+  const isPasswordValid = await user.isPasswordCorrect(password)
 
-  if (!isPasswordVaid) {
+  if (!isPasswordValid) {
     throw new ApiError(401, "Invalid Credentials")
   }
 
-  const{accessToken, refreshToken} = await generateAcessandRefreshToken(user._id)
+  const{accessToken, refreshToken} = await generateAccessandRefreshToken(user._id)
 
   const loggedInUser = await User.findById(user._id)
   .select("-password -refreshToken")
@@ -140,7 +140,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   return res
   .status(200)
-  .cookie("acessToken", accessToken, options)
+  .cookie("accessToken", accessToken, options)
   .cookie("refreshToken", refreshToken, options)
   .json(new ApiResponse(200, loggedInUser, "User logged in successfully"))
 })
@@ -163,12 +163,12 @@ const logoutUser = asyncHandler (async (req, res) => {
 
   return res
     .status(200)
-    .clearCookie("acessToken", options)
+    .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "User logged out Successfully"))
 })
 
-const refreshAcessToken = asyncHandler(async (req, res) => {
+const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
   if(!incomingRefreshToken) {
@@ -195,7 +195,7 @@ const refreshAcessToken = asyncHandler(async (req, res) => {
       secure: process.env.NODE_ENV === "production",
     }
 
-    const {accessToken, refreshToken: newRefreshToken} = await generateAcessandRefreshToken(user._id)
+    const {accessToken, refreshToken: newRefreshToken} = await generateAccessandRefreshToken(user._id)
 
     return res
     .status(200)
@@ -307,13 +307,139 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Cover Image Updated Successfully"));
 })
 
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const {username} = req.params
+
+  if(!username) {
+    throw new ApiError(400, "Username is required")
+  }
+
+  const channel = await User.aggregate(
+    [
+      {
+        $match: {
+          username: username?.toLowerCase()
+        }
+      },
+      {
+        $lookup: {
+          from: "subscriptions",
+          localField: "_id",
+          foreignField: "channel",
+          as: "subscribers"
+        }
+      },
+      {
+        $lookup: {
+          from: "subscriptions",
+          localField: "_id",
+          foreignField: "subscriber",
+          as: "subscribedTo"
+        }
+      },
+      {
+        $addFields: {
+          subscribersCount: {
+            $size: "$subscribers"
+          },
+          channelsSubscribedToCount: {
+            $size: "$subscribedTo"
+          }
+        }
+      },
+      {
+        isSubscribed: {
+          $cond: {
+            if: {
+              $in: [
+                req.user._id, 
+                "$subscribers.subscriber"]},
+                then: true,
+                else: false
+          }
+        }
+      },
+      {
+        // Project only necessary Data
+        $project : {
+          fullname: 1,
+          username: 1,
+          avatar: 1,
+          subscribersCount: 1,
+          channelsSubscribedToCount: 1,
+          isSubscribed: 1,
+          coverImage: 1,
+          email: 1
+        }
+      }
+    ]
+  )
+
+  if(!channel?.length) {
+    throw new ApiError(404, "Channel not found")
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, channel[0], "User Channel Profile Fetched Successfully"));
+})
+
+const getWatchHistory = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user?._id)
+      }
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        pipeline: [{
+          $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "owner",
+            pipeline: [
+              {
+                $project: {
+                  fullname: 1,
+                  username: 1,
+                  avatar: 1
+                }
+              }
+            ]
+          }
+        }]
+      }
+    },
+    {
+      $addFields: {
+        owner: {
+          $first: "$owner"
+        }
+      }
+    }
+  ])
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user[0].watchHistory, "Watch History Fetched Successfully"))
+})
+
 export {
   registerUser,
   loginUser,
-  refreshAcessToken,
+  refreshAccessToken,
   logoutUser,
   changeCurrentPassword,
   updateUserCoverImage,
   updateUserAvatar,
-  updateAccountDetails
+  updateAccountDetails,
+  getWatchHistory,
+  getUserChannelProfile,
+  getCurrentUser
 };
