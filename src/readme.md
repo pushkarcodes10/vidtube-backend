@@ -1,43 +1,45 @@
-# VidTube Backend 🎥
+# VidTube Backend API
 
-A robust, production-ready video streaming and content-sharing backend API inspired by YouTube. Built with modern JavaScript technologies, this platform features secure authentication, media uploads, commenting systems, playlists, tweets, channel metrics dashboards, and subscriber management.
-
----
-
-## 🚀 Tech Stack
-
-- **Runtime Environment:** [Node.js](https://nodejs.org/) (ES Modules)
-- **Web Framework:** [Express.js](https://expressjs.com/) (Express 5.x)
-- **Database:** [MongoDB](https://www.mongodb.com/) with [Mongoose](https://mongoosejs.com/) ODM
-- **Media Storage:** [Cloudinary](https://cloudinary.com/) (via integration for avatar, cover, and video uploads)
-- **Authentication:** JSON Web Tokens ([JWT](https://jwt.io/)) & [bcrypt](https://github.com/kelektiv/node.bcrypt.js)
-- **File Upload Middleware:** [Multer](https://github.com/expressjs/multer)
-- **Logging & Monitoring:** [Winston](https://github.com/winstonjs/winston) & [Morgan](https://github.com/expressjs/morgan)
-- **Code Quality:** [Prettier](https://prettier.io/) & [Nodemon](https://nodemon.io/)
+A production-ready, scalable video streaming and content-sharing backend service inspired by YouTube. Built with modern JavaScript (ES Modules), Node.js, Express, and MongoDB, this platform provides end-to-end features including JWT authentication, Cloudinary media processing, video publishing and streaming workflows, custom playlist management, channel subscriptions, commenting, tweet updates, and channel analytics.
 
 ---
 
-## 🛠️ Key Features
+## Tech Stack
 
-- **User Authentication & Authorization:** Secure registration, login, logout, password updates, profile management, and JWT-based access/refresh token rotation.
-- **Media Management:** Local temporary file staging using Multer and seamless uploading to Cloudinary for avatars, cover images, and videos.
-- **Videos Module:** Uploading, publishing, updating, soft-deleting/toggling visibility, and tracking video metrics (views, duration).
-- **Playlists:** Creating custom video collections, updating playlist details, and adding/removing videos.
-- **Comments & Likes System:** Submitting comments on videos, liking/unliking videos, comments, and tweets.
-- **Subscriptions:** Subscribing to/unsubscribing from channels, listing channel subscribers, and listing subscribed channels.
-- **Tweets (Shorts/Posts):** Creating, updating, deleting, and fetching user posts or updates.
-- **Dashboard:** Rich channel analytics aggregating total views, likes, videos, and subscriber counts.
-- **Structured Error Handling & Logging:** Production-ready request logging with Winston/Morgan and a generic API Error class middleware.
+- **Runtime Environment:** Node.js (ES Modules)
+- **Web Framework:** Express.js (Express 5.x)
+- **Database & Object Data Modeling:** MongoDB with Mongoose ODM
+- **Media Cloud Storage:** Cloudinary SDK (for avatars, cover images, thumbnails, and video assets)
+- **Authentication & Security:** JSON Web Tokens (JWT) & bcrypt for password hashing
+- **File Transfer Handling:** Multer (multipart form-data handling with disk storage staging)
+- **Logging & Monitoring:** Winston logger & Morgan HTTP request profiler
+- **Development & Code Quality:** Nodemon & Prettier
 
 ---
 
-## 📂 Project Structure
+## Key Features
+
+- **User Authentication & Authorization:** Secure registration, login, logout, password rotation, profile updates, and HTTP-only JWT access/refresh token rotation.
+- **Media Management Pipeline:** Local temporary file staging using Multer and automatic upload handling to Cloudinary for media assets.
+- **Video Publishing System:** Uploading video files and thumbnails, updating metadata, toggling publish status, incrementing view metrics, searching, sorting, and pagination.
+- **Playlists:** Creating custom video collections, updating playlist details, appending/removing videos, and calculating total views and video count metrics.
+- **Engagement & Likes System:** Toggle like state across videos, comments, and tweets, plus fetching user-liked videos.
+- **Comments Infrastructure:** Video commenting system with paginated responses and reply count aggregations.
+- **Subscription Management:** Toggle channel subscriptions, fetch subscribers list for a channel, and list all channels subscribed to by a user.
+- **Tweets (Short Posts):** Create, update, delete, and view user status updates with integrated like capabilities.
+- **Channel Dashboard & Analytics:** Aggregate channel statistics including total video views, subscriber count, total likes, and total published videos.
+- **Centralized Error Handling & Logging:** Production-ready request logger with Winston/Morgan and standardized API error/response handling wrappers.
+
+---
+
+## Project Structure
 
 ```text
 vidtube/
 ├── public/                 # Static assets and temporary Multer uploads
+│   └── temp/
 ├── src/
-│   ├── controllers/        # Request handlers & core business logic
+│   ├── controllers/        # Request handlers & business logic
 │   │   ├── comment.controllers.js
 │   │   ├── dashboard.controllers.js
 │   │   ├── healthcheck.controllers.js
@@ -47,13 +49,13 @@ vidtube/
 │   │   ├── tweet.controllers.js
 │   │   ├── user.controllers.js
 │   │   └── video.controllers.js
-│   ├── db/                 # Database connection logic
+│   ├── db/                 # MongoDB connection configuration
 │   │   └── index.js
-│   ├── middlewares/        # Custom Express middlewares
+│   ├── middlewares/        # Express middleware functions
 │   │   ├── auth.middlewares.js
 │   │   ├── error.middlewares.js
 │   │   └── multer.middlewares.js
-│   ├── models/             # Mongoose database schemas
+│   ├── models/             # Mongoose database models
 │   │   ├── comment.models.js
 │   │   ├── like.models.js
 │   │   ├── playlist.models.js
@@ -61,54 +63,58 @@ vidtube/
 │   │   ├── tweet.models.js
 │   │   ├── user.models.js
 │   │   └── video.models.js
-│   ├── routes/             # Express routing
+│   ├── routes/             # Express routes definition
 │   │   ├── healthcheck.routes.js
 │   │   └── user.routes.js
-│   ├── app.js              # Express app setup and global middlewares
-│   ├── index.js            # Server entry point
-│   ├── logger.js           # Winston logger configuration
-│   ├── constants.js        # Global constants (e.g. DB name)
-│   └── readme.md           # Documentation (this file)
-├── .env                    # Local environment secrets (ignored by Git)
-├── .prettierrc             # Code formatting configuration
-├── package.json            # Node.js dependencies and run scripts
-└── app.log                 # Generated application logs (ignored by Git)
+│   ├── utils/              # Helper utilities
+│   │   ├── ApiError.js
+│   │   ├── ApiResponse.js
+│   │   ├── asyncHandler.js
+│   │   └── cloudinary.js
+│   ├── app.js              # Express app setup and middleware configuration
+│   ├── index.js            # Application entry point
+│   ├── logger.js           # Winston logger setup
+│   ├── constants.js        # Global constants
+│   └── readme.md           # Documentation
+├── .env.sample             # Environment configuration template
+├── .prettierrc             # Prettier code format configuration
+├── package.json            # Node.js dependencies and scripts
+└── app.log                 # Generated application log file
 ```
 
 ---
 
-## 🔐 Database Models
+## Database Schema Design
 
-The schema relations are modeled as follows:
-- **User:** Stores username, email, full name, avatar, cover image, watch history (references to Video), password, and refresh token.
-- **Video:** Stores video file URL, thumbnail, title, description, duration, views, publishing status, and owner reference.
-- **Subscription:** Maps a subscriber (User) to a channel (User).
-- **Like:** Links a user's like to a specific Video, Comment, or Tweet.
-- **Comment:** Contains comment text linked to a specific Video and owner (User).
-- **Playlist:** Aggregates a list of Videos under a title and description, owned by a User.
-- **Tweet:** Contains short text updates posted by a User.
+- **User:** Stores username, email, full name, avatar URL, cover image URL, watch history, password hash, and active refresh token.
+- **Video:** Stores video URL, thumbnail URL, title, description, duration, views count, publish status (`isPublished`), and channel owner reference.
+- **Subscription:** Maps subscriber user to target channel user.
+- **Like:** Generic model mapping a user reference (`likedBy`) to a `video`, `comment`, or `tweet`.
+- **Comment:** Stores comment text associated with a specific `video` and `owner`.
+- **Playlist:** Aggregates a list of `Video` references under a name and description, linked to an `owner`.
+- **Tweet:** Contains text updates posted by an `owner`.
 
 ---
 
-## ⚙️ Environment Variables
+## Environment Variables
 
-Create a `.env` file in the root directory and configure the following variables:
+Create a `.env` file in the project root based on the following template:
 
 ```env
 PORT=8000
 CORS_ORIGIN=*
 NODE_ENV=development
 
-# Database
+# MongoDB Connection
 MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net
 
-# JWT Tokens
-ACCESS_TOKEN_SECRET=your_jwt_access_token_secret
+# JWT Configuration
+ACCESS_TOKEN_SECRET=your_access_token_secret
 ACCESS_TOKEN_EXPIRY=1d
-REFRESH_TOKEN_SECRET=your_jwt_refresh_token_secret
+REFRESH_TOKEN_SECRET=your_refresh_token_secret
 REFRESH_TOKEN_EXPIRY=10d
 
-# Cloudinary Credentials
+# Cloudinary Storage Configuration
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
@@ -116,29 +122,61 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
 ---
 
-## 📡 API Endpoints
+## API Documentation
 
-### 🩺 Healthcheck
-- `GET /api/v1/healthcheck` - Server status and database health indicator.
+### Healthcheck
+- `GET /api/v1/healthcheck` - Returns server running status and timestamp.
 
-### 👤 User Authentication & Management
-- `POST /api/v1/users/register` - Create a new user (expects avatar and cover image files via Multer).
-- `POST /api/v1/users/login` - Authenticate user credentials and return HTTP-only cookies with JWT tokens.
-- `POST /api/v1/users/logout` - Clear JWT authentication cookies (Secured).
-- `POST /api/v1/users/refresh-token` - Regenerate access and refresh tokens.
-- `POST /api/v1/users/change-password` - Change the authenticated user's password (Secured).
-- `GET /api/v1/users/current-user` - Retrieve details of the logged-in user (Secured).
-- `PATCH /api/v1/users/update-account` - Update account details (email, full name) (Secured).
-- `PATCH /api/v1/users/avatar` - Upload a new avatar image (Secured).
-- `PATCH /api/v1/users/cover-image` - Upload a new cover image (Secured).
-- `GET /api/v1/users/c/:username` - View another user's channel profile (Secured).
-- `GET /api/v1/users/history` - Retrieve the user's watch history (Secured).
+### Authentication & User Management
+- `POST /api/v1/users/register` - Register new user (multipart form data with `avatar` and optional `coverImage`).
+- `POST /api/v1/users/login` - Authenticate user credentials and return HTTP-only auth cookies.
+- `POST /api/v1/users/logout` - Invalidate refresh token and clear auth cookies (Secured).
+- `POST /api/v1/users/refresh-token` - Renew access token using refresh token.
+- `POST /api/v1/users/change-password` - Update current user password (Secured).
+- `GET /api/v1/users/current-user` - Get current authenticated user details (Secured).
+- `PATCH /api/v1/users/update-account` - Update account full name and email (Secured).
+- `PATCH /api/v1/users/avatar` - Update avatar image file (Secured).
+- `PATCH /api/v1/users/cover-image` - Update cover image file (Secured).
+- `GET /api/v1/users/c/:username` - Fetch channel profile details with subscriber counts (Secured).
+- `GET /api/v1/users/history` - Retrieve watch history with video owner information (Secured).
 
-*(Additional endpoints for Videos, Playlists, Tweets, Likes, Comments, and Subscriptions will be configured in their respective routers).*
+### Video Management
+- `GET /api/v1/videos` - Search, sort, and paginate videos.
+- `POST /api/v1/videos` - Publish a video with video file and thumbnail uploads (Secured).
+- `GET /api/v1/videos/:videoId` - Fetch video details, channel stats, and increment views (Secured).
+- `PATCH /api/v1/videos/:videoId` - Update video title, description, or thumbnail (Secured).
+- `DELETE /api/v1/videos/:videoId` - Delete video and clean up related comments/likes (Secured).
+- `PATCH /api/v1/videos/toggle/publish/:videoId` - Toggle video public visibility (Secured).
+
+### Playlist Management
+- `POST /api/v1/playlists` - Create a new playlist (Secured).
+- `GET /api/v1/playlists/user/:userId` - Get all playlists created by a specific user (Secured).
+- `GET /api/v1/playlists/:playlistId` - Get playlist details with populated video items and view metrics (Secured).
+- `PATCH /api/v1/playlists/add/:videoId/:playlistId` - Add video to playlist (Secured).
+- `PATCH /api/v1/playlists/remove/:videoId/:playlistId` - Remove video from playlist (Secured).
+- `PATCH /api/v1/playlists/:playlistId` - Update playlist title and description (Secured).
+- `DELETE /api/v1/playlists/:playlistId` - Delete playlist (Secured).
+
+### Like System
+- `POST /api/v1/likes/toggle/v/:videoId` - Toggle like on a video (Secured).
+- `POST /api/v1/likes/toggle/c/:commentId` - Toggle like on a comment (Secured).
+- `POST /api/v1/likes/toggle/t/:tweetId` - Toggle like on a tweet (Secured).
+- `GET /api/v1/likes/videos` - Get all videos liked by the current user (Secured).
+
+### Subscriptions
+- `POST /api/v1/subscriptions/c/:channelId` - Toggle channel subscription (Secured).
+- `GET /api/v1/subscriptions/c/:channelId` - Get list of subscribers for a channel (Secured).
+- `GET /api/v1/subscriptions/u/:subscriberId` - Get list of channels subscribed by a user (Secured).
+
+### Tweets
+- `POST /api/v1/tweets` - Create a tweet post (Secured).
+- `GET /api/v1/tweets/user/:userId` - Fetch user tweets with likes count (Secured).
+- `PATCH /api/v1/tweets/:tweetId` - Update tweet content (Secured).
+- `DELETE /api/v1/tweets/:tweetId` - Delete tweet (Secured).
 
 ---
 
-## 🔧 Installation & Setup
+## Installation & Setup
 
 1. **Clone the Repository:**
    ```bash
@@ -151,25 +189,24 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
    npm install
    ```
 
-3. **Configure Environment Variables:**
-   - Follow the instructions in the [Environment Variables](#%EF%B8%8F-environment-variables) section.
+3. **Set Up Environment Variables:**
+   - Copy `.env.sample` to `.env` and fill in your MongoDB URI, JWT secrets, and Cloudinary credentials.
 
 4. **Run in Development Mode:**
    ```bash
    npm run dev
    ```
-   *The server runs on `http://localhost:8000` (or specified `PORT`).*
+   *The server will start on `http://localhost:8000` (or your configured `PORT`).*
 
 5. **Code Formatting:**
    ```bash
    npm run format
    ```
-   *Ensure standard formatting styles using Prettier.*
 
 ---
 
-## 📝 Logging System
+## Logging System
 
-The application utilizes a custom **Winston logger** integrated with **Morgan** for HTTP request profiling.
-- Terminal outputs are colorized for readability.
-- Detailed JSON logs are persisted in `app.log` in the root folder, including method type, requested URL, response status code, and latency in milliseconds.
+The backend features a structured logging setup using **Winston** and **Morgan**:
+- Console output with color-coded log levels for local debugging.
+- Persistent file logging saved to `app.log` recording request HTTP method, path, status code, response time, and timestamps.
